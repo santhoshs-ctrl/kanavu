@@ -1,0 +1,29 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kanavu Admin</title>
+<style>body{font-family:Georgia,serif;max-width:640px;margin:30px auto;padding:0 16px}
+input{padding:6px;margin:3px}button{padding:8px 14px;margin-top:10px}
+.row{display:flex;gap:6px;align-items:center}</style></head><body>
+<h2>Kanavu – songs list maker</h2>
+<p>1. Un MP3 files-ah <b>songs</b> folder-la, cover images-ah <b>covers</b> folder-la podu.<br>
+2. Inge ovvoru song-kum file name + title kudu.<br>
+3. "Download songs.json" click panni, pazhaya songs.json-ah replace pannu.<br>
+Delete panna: row-ah remove pannu + MP3 file-ah folder-la irundhu delete pannu.</p>
+<div id="rows"></div>
+<button onclick="addRow()">+ Add song</button>
+<button onclick="dl()">Download songs.json</button>
+<script>
+const rows=document.getElementById('rows');
+function addRow(t='',f='',c=''){
+  const d=document.createElement('div');d.className='row';
+  d.innerHTML='<input placeholder="Song title" value="'+t+'"><input placeholder="song file e.g. song1.mp3" value="'+f+'"><input placeholder="cover e.g. cover1.jpg" value="'+c+'"><button onclick="this.parentNode.remove()">✕</button>';
+  rows.append(d);
+}
+fetch('songs.json').then(r=>r.json()).then(a=>a.forEach(s=>addRow(s.title,s.file.replace('songs/',''),(s.cover||'').replace('covers/','')))).catch(()=>addRow());
+function dl(){
+  const out=[...rows.children].map(r=>{const i=r.querySelectorAll('input');const cv=i[2].value.trim();return cv?{title:i[0].value.trim(),file:'songs/'+i[1].value.trim(),cover:'covers/'+cv}:{title:i[0].value.trim(),file:'songs/'+i[1].value.trim()}}).filter(s=>s.title&&s.file!=='songs/');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}));
+  a.download='songs.json';a.click();
+}
+</script></body></html>
